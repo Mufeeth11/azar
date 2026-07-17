@@ -4,7 +4,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import contactRoutes from './routes/contact';
+import activitiesRoutes from './routes/activities';
+import { initDb } from './config/database';
 
 dotenv.config();
 
@@ -25,15 +28,21 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Serve static uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Routes
 app.use('/api/contact', contactRoutes);
+app.use('/api/activities', activitiesRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Initialize database and start server
+initDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });

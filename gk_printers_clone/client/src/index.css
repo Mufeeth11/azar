@@ -15,7 +15,7 @@
 body {
   font-family: var(--font-poppins);
   color: var(--color-dark-text);
-  background-color: #020000; /* Dark theme default for premium look */
+  background-color: #f9fafb; /* Light theme default */
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import Magnetic from './Magnetic';
+import Logo from './Logo';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -12,14 +13,14 @@ const navLinks = [
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
   const location = useLocation();
 
+  const [isHidden, setIsHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
-    
     // Dynamic blur/background on scroll
     if (latest > 50) {
       setIsScrolled(true);
@@ -27,12 +28,15 @@ export default function Header() {
       setIsScrolled(false);
     }
 
-    // Hide navbar on scroll down, show on scroll up
-    if (latest > previous && latest > 150) {
-      setHidden(true);
-    } else {
-      setHidden(false);
+    // Hide/show logic based on scroll direction
+    if (latest > lastScrollY && latest > 100) {
+      // Scrolling down & past 100px
+      setIsHidden(true);
+    } else if (latest < lastScrollY) {
+      // Scrolling up
+      setIsHidden(false);
     }
+    setLastScrollY(latest);
   });
 
   useEffect(() => {
@@ -42,33 +46,37 @@ export default function Header() {
   return (
     <>
       <motion.header
-        variants={{
-          visible: { y: 0, opacity: 1 },
-          hidden: { y: '-150%', opacity: 0 }
+        initial={{ y: 0 }}
+        animate={{ 
+          y: isHidden ? '-100%' : 0, 
+          opacity: 1 
         }}
-        animate={hidden && !isOpen ? 'hidden' : 'visible'}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-0 left-0 w-full z-50 px-4 pt-6 pb-4 flex justify-center pointer-events-none"
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-0 left-0 w-full z-50 flex pointer-events-none"
       >
-        <motion.div 
+        <motion.div
           animate={{
-            backgroundColor: isScrolled ? 'rgba(3, 0, 8, 0.7)' : 'rgba(3, 0, 8, 0.3)',
+            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
             backdropFilter: isScrolled ? 'blur(20px)' : 'blur(10px)',
-            borderColor: isScrolled ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-            boxShadow: isScrolled ? '0 10px 40px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.2)'
+            borderColor: isScrolled ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+            boxShadow: isScrolled ? '0 10px 40px rgba(0,0,0,0.05)' : 'none'
           }}
           transition={{ duration: 0.4 }}
-          className="pointer-events-auto h-[60px] md:h-[70px] rounded-full flex items-center justify-center px-6 md:px-3 gap-8 w-max border"
+          className="pointer-events-auto h-[70px] md:h-[80px] flex items-center justify-between px-6 md:px-12 w-full border-b transition-colors"
         >
+          {/* Logo */}
+          <div className="mr-2 md:mr-4 pl-2">
+            <Logo />
+          </div>
+
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/5">
+          <nav className="hidden md:flex items-center gap-1 bg-gray-100/80 rounded-full p-1 border border-gray-200">
             {navLinks.map((link) => (
               <Magnetic key={link.path} intensity={0.2}>
                 <NavLink
                   to={link.path}
-                  className={({ isActive }) => 
-                    `relative px-6 py-2.5 rounded-full font-poppins font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-300 ${
-                      isActive ? 'text-white bg-white/10 shadow-[inset_0_1px_4px_rgba(255,255,255,0.1)]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  className={({ isActive }) =>
+                    `relative px-6 py-2.5 rounded-full font-poppins font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-300 ${isActive ? 'text-gray-900 bg-white shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
                     }`
                   }
                 >
@@ -81,8 +89,8 @@ export default function Header() {
 
 
           {/* Mobile Toggle */}
-          <button 
-            className="md:hidden flex items-center gap-4 text-white z-50 relative group px-2 py-1"
+          <button
+            className="md:hidden flex items-center gap-4 text-gray-900 z-50 relative group px-2 py-1"
             onClick={() => setIsOpen(!isOpen)}
           >
             <span className="font-poppins font-bold text-[11px] tracking-[0.2em] uppercase group-hover:text-[#10A7FF] transition-colors">{isOpen ? 'Close' : 'Menu'}</span>
@@ -103,7 +111,7 @@ export default function Header() {
             animate={{ opacity: 1, backdropFilter: 'blur(30px)' }}
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 top-0 left-0 w-full h-screen bg-[#030008]/90 z-40 flex flex-col items-center justify-center"
+            className="fixed inset-0 top-0 left-0 w-full h-screen bg-white/95 z-40 flex flex-col items-center justify-center"
           >
             {/* Background glowing effects for the overlay */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#605BE5]/20 via-transparent to-transparent pointer-events-none blur-[100px]"></div>
@@ -120,9 +128,8 @@ export default function Header() {
                 >
                   <NavLink
                     to={link.path}
-                    className={({ isActive }) => 
-                      `font-montserrat font-extrabold text-5xl uppercase tracking-tighter block transition-all duration-300 ${
-                        isActive ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFC527] to-[#10A7FF]' : 'text-gray-400 hover:text-white hover:tracking-normal'
+                    className={({ isActive }) =>
+                      `font-montserrat font-extrabold text-5xl uppercase tracking-tighter block transition-all duration-300 ${isActive ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFC527] to-[#10A7FF]' : 'text-gray-400 hover:text-gray-900 hover:tracking-normal'
                       }`
                     }
                   >

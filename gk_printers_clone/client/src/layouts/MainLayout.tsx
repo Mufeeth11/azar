@@ -1,10 +1,21 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useLenis } from 'lenis/react';
 
 export default function MainLayout() {
   const location = useLocation();
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, lenis]);
 
   return (
     <div className="flex flex-col min-h-screen">

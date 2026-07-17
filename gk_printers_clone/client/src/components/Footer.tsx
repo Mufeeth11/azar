@@ -1,12 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowUp, Phone } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedinIn, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Magnetic from './Magnetic';
+import { useLenis } from 'lenis/react';
 
 export default function Footer() {
   const [showScroll, setShowScroll] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const checkScroll = () => {
@@ -20,27 +22,33 @@ export default function Footer() {
     return () => window.removeEventListener('scroll', checkScroll);
   }, []);
 
+  const lenis = useLenis();
+
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
     <footer className="bg-[#020000] text-white pt-[100px] pb-[40px] relative overflow-hidden border-t border-white/5">
       {/* Decorative Blur */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-[#605BE5]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
-      
+
       <div className="container mx-auto px-4 md:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-8">
           {/* Column 1: Company Info */}
-          <div className="flex flex-col lg:max-w-xs">
+          <div className="flex flex-col lg:max-w-xs -ml-4 lg:-ml-20 xl:-ml-32">
             <Magnetic intensity={0.2}>
               <Link to="/" className="inline-block flex items-center gap-3">
-                <span className="font-montserrat font-bold text-xl text-white tracking-wide">GK Printers</span>
+                <span className="font-montserrat font-bold text-xl text-white tracking-wide">SR Digital</span>
               </Link>
             </Magnetic>
-            
+
             <p className="font-poppins text-gray-400 mt-6 mb-8 text-[15px] leading-relaxed">
-              Professional printing solutions for businesses. High-quality digital, offset, and large format prints delivered fast. We turn big ideas into powerful visual experiences that drive real growth.
+              Premium printing solutions for businesses. We deliver high-quality digital, offset, and large format prints with incredible speed.
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -48,13 +56,11 @@ export default function Footer() {
                 { Icon: FaTwitter, link: '#' },
                 { Icon: FaLinkedinIn, link: '#' },
                 { Icon: FaFacebook, link: '#' },
-                { Icon: FaInstagram, link: '#' },
-                { Icon: FaWhatsapp, link: '#' },
-                { Icon: FaYoutube, link: '#' }
+                { Icon: FaInstagram, link: '#' }
               ].map((item, idx) => (
                 <Magnetic key={idx} intensity={0.5}>
-                  <a href={item.link} className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 group">
-                    <item.Icon className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+                  <a href={item.link} className="w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-sm">
+                    <item.Icon className="w-4 h-4 text-gray-900" />
                   </a>
                 </Magnetic>
               ))}
@@ -66,25 +72,27 @@ export default function Footer() {
             <h3 className="font-montserrat font-bold text-white text-[18px] mb-6 tracking-wide">Services</h3>
             <nav className="flex flex-col gap-4">
               {[
-                'Digital Printing', 
-                'Offset Printing', 
-                'Business Cards', 
-                'Brochures & Flyers', 
-                'Large Format Printing',
-                'Packaging Solutions'
-              ].map((name, idx) => (
-                <Link 
+                { name: 'Digital Printing', id: 'digital-printing' },
+                { name: 'Visiting Card Printing', id: 'visiting-card-printing' },
+                { name: 'Flex Printing', id: 'digital-flex' }
+              ].map((item, idx) => (
+                <Link
                   key={idx}
-                  to="/services" 
+                  to={`/services/${item.id}`}
+                  onClick={(e) => {
+                    if (location.pathname === `/services/${item.id}`) {
+                      e.preventDefault();
+                      scrollToTop();
+                    }
+                  }}
                   className="font-poppins text-[15px] text-gray-400 hover:text-white transition-colors relative group w-max"
                 >
-                  {name}
-                  <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-white/50 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
+                  {item.name}
                 </Link>
               ))}
             </nav>
           </div>
-          
+
           {/* Column 3: Quick Links */}
           <div className="flex flex-col">
             <h3 className="font-montserrat font-bold text-white text-[18px] mb-6 tracking-wide">Pages</h3>
@@ -92,18 +100,20 @@ export default function Footer() {
               {[
                 { name: 'Home', path: '/' },
                 { name: 'About Us', path: '/about' },
-                { name: 'Services', path: '/services' },
-                { name: 'Portfolio', path: '/#portfolio' },
-                { name: 'Our Process', path: '/about#process' },
-                { name: 'Testimonials', path: '/#testimonials' }
+                { name: 'Services', path: '/services' }
               ].map((link, idx) => (
-                <Link 
+                <Link
                   key={idx}
-                  to={link.path} 
+                  to={link.path}
+                  onClick={(e) => {
+                    if (location.pathname === link.path) {
+                      e.preventDefault();
+                      scrollToTop();
+                    }
+                  }}
                   className="font-poppins text-[15px] text-gray-400 hover:text-white transition-colors relative group w-max"
                 >
                   {link.name}
-                  <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-white/50 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
                 </Link>
               ))}
             </nav>
@@ -111,23 +121,25 @@ export default function Footer() {
 
           {/* Column 4: Get in Touch */}
           <div className="flex flex-col">
-             <h3 className="font-montserrat font-bold text-white text-[18px] mb-6 tracking-wide">Get in Touch</h3>
-             <nav className="flex flex-col gap-4">
+            <h3 className="font-montserrat font-bold text-white text-[18px] mb-6 tracking-wide">Get in Touch</h3>
+            <nav className="flex flex-col gap-4">
               {[
                 { name: 'Contact Us', path: '/contact' },
-                { name: 'Support', path: '/contact' },
-                { name: 'Get a Quote', path: '/contact' },
-                { name: 'Request Callback', path: '/contact' },
-                { name: 'Privacy Policy', path: '#' },
-                { name: 'Terms of Service', path: '#' }
+                { name: 'Privacy Policy', path: '/privacy' },
+                { name: 'Terms of Service', path: '/terms' }
               ].map((link, idx) => (
-                <Link 
+                <Link
                   key={idx}
-                  to={link.path} 
+                  to={link.path}
+                  onClick={(e) => {
+                    if (location.pathname === link.path) {
+                      e.preventDefault();
+                      scrollToTop();
+                    }
+                  }}
                   className="font-poppins text-[15px] text-gray-400 hover:text-white transition-colors relative group w-max"
                 >
                   {link.name}
-                  <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-white/50 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
                 </Link>
               ))}
             </nav>
@@ -135,23 +147,12 @@ export default function Footer() {
         </div>
 
         {/* Divider and Copyright */}
-        <div className="w-full h-px bg-white/10 mt-8 mb-8"></div>
-        
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 font-poppins text-[14px] text-gray-500">
-          <p>© {new Date().getFullYear()} <span className="font-semibold text-white">GK Printers</span>. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link to="#" className="hover:text-white transition-colors relative group">
-              Privacy Policy
-              <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-white/50 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
-            </Link>
-            <Link to="#" className="hover:text-white transition-colors relative group">
-              Terms & Conditions
-              <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-white/50 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
-            </Link>
-            <Link to="#" className="hover:text-white transition-colors relative group">
-              Sitemap
-              <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-white/50 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
-            </Link>
+        <div className="w-full h-px bg-white/10 mt-4 mb-8"></div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 font-poppins text-[14px] text-gray-500 -ml-4 lg:-ml-20 xl:-ml-32">
+          <p>© {new Date().getFullYear()} <span className="font-semibold text-white">SR Digital</span>. All rights reserved.</p>
+          <div className="flex gap-6 items-center">
+            <p>Powered by <span className="font-semibold text-white">Workeazi</span></p>
           </div>
         </div>
       </div>

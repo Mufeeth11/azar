@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { supabase } from '../config/supabase';
+import { getDb } from '../config/database';
 
 export const submitContact = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -10,19 +10,33 @@ export const submitContact = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // In a real application, create a table named 'contacts' in Supabase
-    // const { data, error } = await supabase.from('contacts').insert([
-    //   { first_name: firstName, last_name: lastName, email, phone, message }
-    // ]);
+    // Insert into local SQLite database
+    const db = await getDb();
+    await db.run(
+      'INSERT INTO contacts (first_name, last_name, email, phone, message) VALUES (?, ?, ?, ?, ?)',
+      [firstName, lastName, email, phone, message]
+    );
 
-    // if (error) throw error;
-    
-    // Simulating database insertion for demonstration since we don't have actual Supabase credentials here
-    console.log('Received contact submission:', { firstName, lastName, email, phone, message });
+    console.log('Successfully saved contact submission to local SQLite database.');
     
     res.status(200).json({ message: 'Contact submitted successfully', data: { firstName, lastName, email, phone, message } });
   } catch (error) {
     console.error('Contact submission error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getContacts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const db = await getDb();
+    const messages = await db.all('SELECT * FROM contacts ORDER BY created_at DESC');
+    
+    res.status(200).json({ 
+      count: messages.length,
+      messages 
+    });
+  } catch (error) {
+    console.error('Failed to retrieve contacts:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
