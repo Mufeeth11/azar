@@ -37,10 +37,10 @@ const ServiceDetail = () => {
               id: id,
               title: found.title,
               desc: found.detailed_description || found.description, // Use detailed if available
-              img: found.image_url 
-                ? (found.image_url.startsWith('http') || found.image_url.startsWith('/assets') 
-                    ? found.image_url 
-                    : `http://localhost:5000${found.image_url.startsWith('/') ? '' : '/'}${found.image_url}`) 
+              img: found.image_url
+                ? (found.image_url.startsWith('http') || found.image_url.startsWith('/assets')
+                  ? found.image_url
+                  : `http://localhost:5000${found.image_url.startsWith('/') ? '' : '/'}${found.image_url}`)
                 : 'https://images.unsplash.com/photo-1626785776965-b903e103986a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
               Icon: Activity,
               content: "Custom printing solution tailored to your exact specifications.",
@@ -156,6 +156,22 @@ const ServiceDetail = () => {
         </div>
       </section>
 
+      {/* Image Section */}
+      {service.img && (
+        <section className="px-4 md:px-8 relative z-10 -mt-4 mb-12">
+          <div className="container mx-auto max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="rounded-3xl overflow-hidden shadow-lg border border-gray-100 h-[200px] md:h-[300px]"
+            >
+              <img src={service.img} alt={service.title} className="w-full h-full object-cover" />
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* Details Section */}
       <section className="pt-4 pb-20 px-4 md:px-8 relative z-10">
         <div className="container mx-auto max-w-5xl">
@@ -167,7 +183,7 @@ const ServiceDetail = () => {
 
             <h2 className="text-2xl md:text-3xl font-montserrat font-bold text-gray-900 mb-8">Key Features & Benefits</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {service.features.map((feature, idx) => (
+              {service.features.map((feature: string, idx: number) => (
                 <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
                   <div className="mt-1 shrink-0">
                     <CheckCircle className="w-5 h-5 text-[#F47C20]" />

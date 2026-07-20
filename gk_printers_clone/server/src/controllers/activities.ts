@@ -5,10 +5,10 @@ export const getActivities = async (req: Request, res: Response): Promise<void> 
   try {
     const db = await getDb();
     const activities = await db.all('SELECT * FROM activities ORDER BY created_at DESC');
-    
-    res.status(200).json({ 
+
+    res.status(200).json({
       count: activities.length,
-      activities 
+      activities
     });
   } catch (error) {
     console.error('Failed to retrieve activities:', error);
@@ -36,9 +36,9 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
       [title, description, detailed_description || null, image_url]
     );
 
-    res.status(201).json({ 
-      message: 'Activity created successfully', 
-      id: result.lastID 
+    res.status(201).json({
+      message: 'Activity created successfully',
+      id: result.lastID
     });
   } catch (error) {
     console.error('Failed to create activity:', error);
@@ -62,7 +62,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
     }
 
     const db = await getDb();
-    
+
     // If an image is provided (either new file or URL), update it.
     // If not, keep the existing one (we don't overwrite with null unless requested, but here let's assume we update if provided).
     // Actually, to make it robust, let's fetch the existing first.
@@ -89,7 +89,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
 export const deleteActivity = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       res.status(400).json({ error: 'Activity ID is required.' });
       return;

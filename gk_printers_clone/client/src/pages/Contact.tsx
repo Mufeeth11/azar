@@ -81,11 +81,21 @@ const Contact = React.memo(() => {
     setIsLoading(true);
     setStatus({ type: null, message: '' });
     try {
-      await axios.post('http://localhost:5000/api/contact', data);
-      setStatus({ type: 'success', message: 'Message sent successfully! We will get back to you soon.' });
+      if (data.type === 'order') {
+        await axios.post('http://localhost:5000/api/orders', {
+          customer_name: `${data.firstName} ${data.lastName || ''}`.trim(),
+          email: data.email,
+          phone: data.phone,
+          details: data.message
+        });
+        setStatus({ type: 'success', message: 'Order placed successfully! We will contact you shortly to confirm details.' });
+      } else {
+        await axios.post('http://localhost:5000/api/contact', data);
+        setStatus({ type: 'success', message: 'Message sent successfully! We will get back to you soon.' });
+      }
       reset();
     } catch (error) {
-      setStatus({ type: 'error', message: 'Failed to send message. Please try again later.' });
+      setStatus({ type: 'error', message: 'Failed to submit. Please try again later.' });
     } finally {
       setIsLoading(false);
     }
@@ -194,6 +204,18 @@ const Contact = React.memo(() => {
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 relative z-10">
+                  <div>
+                    <label className="block font-poppins text-xs font-medium text-gray-600 mb-1">Inquiry Type *</label>
+                    <select
+                      {...register('type')}
+                      className={inputClasses}
+                      defaultValue="contact"
+                    >
+                      <option value="contact">General Message / Inquiry</option>
+                      <option value="order">Place an Order</option>
+                    </select>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block font-poppins text-xs font-medium text-gray-600 mb-1">First Name *</label>
@@ -239,12 +261,12 @@ const Contact = React.memo(() => {
                   </div>
 
                   <div>
-                    <label className="block font-poppins text-xs font-medium text-gray-600 mb-1">Message *</label>
+                    <label className="block font-poppins text-xs font-medium text-gray-600 mb-1">Message / Order Details *</label>
                     <textarea
-                      {...register('message', { required: 'Message is required' })}
+                      {...register('message', { required: 'This field is required' })}
                       rows={5}
                       className={`${inputClasses} resize-none`}
-                      placeholder="How can we help you?"
+                      placeholder="How can we help you? Or describe the items you'd like to order..."
                     ></textarea>
                     {errors.message && <span className="text-red-400 text-xs mt-2 block font-poppins">{(errors.message as any).message}</span>}
                   </div>

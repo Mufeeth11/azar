@@ -43,7 +43,7 @@ const Services = React.memo(() => {
         : 'https://images.unsplash.com/photo-1626785776965-b903e103986a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       icon: 'dynamic'
     }));
-    return mappedDynamic;
+    return [...servicesData, ...mappedDynamic];
   }, [dynamicServices]);
 
   const displayedServices = showAll ? allServices : allServices.slice(0, 3);
